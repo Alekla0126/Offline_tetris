@@ -48,10 +48,6 @@ class _HomePageState extends State<HomePage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? localUrl = prefs.getString('localUrl');
 
-    if (localUrl != null && localUrl.isNotEmpty) {
-      _url = localUrl;
-    }
-
     var connectivityResult = await _connectivity.checkConnectivity();
     if (connectivityResult == ConnectivityResult.none) {
       _showNetworkErrorDialog();
@@ -62,26 +58,31 @@ class _HomePageState extends State<HomePage> {
       try {
         final remoteConfig = FirebaseRemoteConfig.instance;
         await remoteConfig.setConfigSettings(RemoteConfigSettings(
-          fetchTimeout: const Duration(seconds: 5),
-          minimumFetchInterval: const Duration(hours: 1),
+          fetchTimeout: const Duration(seconds: 60),
+          minimumFetchInterval: const Duration(seconds: 0),
         ));
         await remoteConfig.fetchAndActivate();
         String firebaseUrl = remoteConfig.getString('firebaseUrl');
-        bool emulator = await checkIsEmu();
-        if ((firebaseUrl != '') || (emulator == false)) {
+
+        // Checking if the local URL is different from the Firebase URL
+        if (firebaseUrl != localUrl) {
+          print('URL has been updated');
           prefs.setString('localUrl', firebaseUrl);
+        }
+
+        bool emulator = await checkIsEmu();
+        print('Fetched URL: $firebaseUrl');
+
+        if ((firebaseUrl != '') || (emulator == false)) {
           setState(() {
             _url = firebaseUrl;
           });
-          print('Fetched URL: $firebaseUrl');
         } else {
-          // Navigating to TetrisGamePage when firebaseUrl is empty or the device is not an emulator
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const TetrisGamePage()),
           );
         }
       } catch (e) {
-        // If firebase remote config gets an error while processing.
         _showNetworkErrorDialog();
       }
     }
