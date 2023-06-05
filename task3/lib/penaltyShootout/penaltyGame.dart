@@ -8,7 +8,7 @@ import 'dart:ui';
 
 void main() {
   runApp(
-    MaterialApp(
+    const MaterialApp(
       home: Scaffold(
         body: GameWrapper(),
       ),
@@ -17,6 +17,7 @@ void main() {
 }
 
 class GameWrapper extends StatelessWidget {
+  const GameWrapper({super.key});
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -33,13 +34,15 @@ class PenaltyGame extends FlameGame with TapDetector {
   late SpriteComponent background;
   late Player player;
   late Goalie goalie;
-  late ScoreDisplay scoreDisplay;
+  late List<GrayBall> grayBalls;
+  late List<ColoredBall> coloredBalls;
 
   Image? bgImage;
-  Image? playerImage;
+  Image? soccerBall;
   Image? goalieImage;
 
-  int score = 0;
+  int grayBallsCount = 5;
+  int coloredBallsCount = 0;
 
   @override
   Future<void> onLoad() async {
@@ -54,8 +57,8 @@ class PenaltyGame extends FlameGame with TapDetector {
 
     player = Player(
       position: Vector2(size.x / 2, size.y - 200),
-      shootCallback: incrementScore,
-      sprite: Sprite(playerImage!),
+      shootCallback: incrementColoredBalls,
+      sprite: Sprite(soccerBall!),
       game: this, // Pass the game instance
     );
     add(player);
@@ -66,19 +69,49 @@ class PenaltyGame extends FlameGame with TapDetector {
     );
     add(goalie);
 
-    scoreDisplay = ScoreDisplay(position: Vector2(size.x / 2, 50));
-    add(scoreDisplay);
+    grayBalls = List.generate(
+      grayBallsCount,
+          (index) => GrayBall(
+            position: Vector2(
+              size.x - size.x / 3 + index * (size.x / 9), // Adjust position
+              size.y - 100.0,
+            ),
+        radius: 20.0,
+      ),
+    );
+    grayBalls.forEach(add);
+
+    coloredBalls = List.generate(
+      coloredBallsCount,
+          (index) => ColoredBall(
+        position: Vector2(
+          size.x - size.x / 3 + index * (size.x / 9), // Adjust position
+          size.y - 100.0,
+        ),
+        radius: 20.0,
+      ),
+    );
+    coloredBalls.forEach(add);
   }
 
   Future<void> loadImages() async {
     bgImage = await Flame.images.load('background.png');
-    playerImage = await Flame.images.load('player.png');
+    soccerBall = await Flame.images.load('ball.png');
     goalieImage = await Flame.images.load('goalie.png');
   }
 
-  void incrementScore() {
-    score++;
-    scoreDisplay.updateScore(score);
+  void incrementColoredBalls() {
+    coloredBallsCount++;
+    grayBallsCount--;
+    coloredBalls.add(ColoredBall(
+      position: Vector2(
+          size.x - 100.0 * coloredBallsCount, 50.0
+      ),
+      radius: 20.0,
+    ));
+    grayBalls.removeLast();
+    add(coloredBalls.last);
+    remove(grayBalls.last);
   }
 
   @override
@@ -110,7 +143,7 @@ class Player extends SpriteComponent {
     required this.game, // Pass the game reference
   }) : super(
     position: position,
-    size: Vector2(100, 100),
+    size: Vector2.all(100),
     sprite: sprite,
   );
 
@@ -124,8 +157,7 @@ class Player extends SpriteComponent {
     if (!isShooting) {
       isShooting = true;
       shootDirection = finalPosition - position;
-      shootStrength = shootDirection.length /
-          500;
+      shootStrength = shootDirection.length / 500;
       shootDirection.normalize();
       shootCallback();
     }
@@ -160,22 +192,38 @@ class Goalie extends SpriteComponent {
   );
 }
 
-class ScoreDisplay extends TextComponent {
-  ScoreDisplay({
-    required Vector2 position,
-  }) : super(
-    text: 'Score: 0',
-    position: position,
-    textRenderer: TextPaint(
-      style: const TextStyle(
-        fontSize: 32.0,
-        fontFamily: 'Arial',
-        color: Color(0xFFFFFFFF),
-      ),
-    ),
-  );
+class GrayBall extends PositionComponent {
+  final double radius;
+  Paint paint = Paint()..color = Colors.grey;
 
-  void updateScore(int newScore) {
-    text = 'Score: $newScore';
+  GrayBall({
+    required Vector2 position,
+    required this.radius,
+  }) {
+    this.position = position;
+    size = Vector2(radius * 2, radius * 2);
+  }
+
+  @override
+  void render(Canvas canvas) {
+    canvas.drawCircle(position.toOffset(), radius, paint);
+  }
+}
+
+class ColoredBall extends PositionComponent {
+  final double radius;
+  Paint paint = Paint()..color = Colors.green;
+
+  ColoredBall({
+    required Vector2 position,
+    required this.radius,
+  }) {
+    this.position = position;
+    size = Vector2(radius * 2, radius * 2);
+  }
+
+  @override
+  void render(Canvas canvas) {
+    canvas.drawCircle(position.toOffset(), radius, paint);
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 
 class WebViewPage extends StatefulWidget {
@@ -10,8 +11,8 @@ class WebViewPage extends StatefulWidget {
 
 class _WebViewPageState extends State<WebViewPage> {
   late InAppWebViewController _webViewController;
-  // final ImagePicker _picker = ImagePicker();
-  // late XFile? _selectedImage;
+  final ImagePicker _picker = ImagePicker();
+  late XFile? _selectedImage;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +34,7 @@ class _WebViewPageState extends State<WebViewPage> {
           initialOptions: InAppWebViewGroupOptions(
             crossPlatform: InAppWebViewOptions(
               useShouldOverrideUrlLoading: true,
-              // javaScriptCanOpenWindowsAutomatically: true,
+              javaScriptCanOpenWindowsAutomatically: true,
               mediaPlaybackRequiresUserGesture: false,
               // Javascript is enabled.
               javaScriptEnabled: true,
@@ -45,14 +46,14 @@ class _WebViewPageState extends State<WebViewPage> {
           onWebViewCreated: (InAppWebViewController controller) {
             _webViewController = controller;
           },
-          // shouldOverrideUrlLoading: (controller, navigationAction) async {
-          //   if (navigationAction.request.url!.toString().startsWith('fileUpload:')) {
-          //     // Handle file upload action
-          //     // await handleFileUpload();
-          //     return NavigationActionPolicy.CANCEL;
-          //   }
-          //   return NavigationActionPolicy.ALLOW;
-          // },
+          shouldOverrideUrlLoading: (controller, navigationAction) async {
+            if (navigationAction.request.url!.toString().startsWith('fileUpload:')) {
+              // Handle file upload action
+              // await handleFileUpload();
+              return NavigationActionPolicy.CANCEL;
+            }
+            return NavigationActionPolicy.ALLOW;
+          },
           androidOnPermissionRequest:
               (InAppWebViewController controller, String origin,
               List<String> resources) async {
@@ -64,13 +65,13 @@ class _WebViewPageState extends State<WebViewPage> {
       ),
     );
   }
-  // Future<void> handleFileUpload() async {
-  //   final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-  //   if (pickedFile != null) {
-  //     setState(() {
-  //       _selectedImage = pickedFile;
-  //     });
-  //     _webViewController.evaluateJavascript(source: 'fileUploadComplete("${pickedFile.path}");');
-  //   }
-  // }
+  Future<void> handleFileUpload() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = pickedFile;
+      });
+      _webViewController.evaluateJavascript(source: 'fileUploadComplete("${pickedFile.path}");');
+    }
+  }
 }
