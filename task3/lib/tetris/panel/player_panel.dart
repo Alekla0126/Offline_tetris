@@ -27,7 +27,7 @@ class PlayerPanel extends StatelessWidget {
     return SizedBox.fromSize(
       size: size,
       child: Container(
-        padding: EdgeInsets.all(2),
+        padding: const EdgeInsets.all(2),
         decoration: BoxDecoration(
           border: Border.all(color: Colors.black),
         ),
@@ -72,7 +72,7 @@ class _GameUninitialized extends StatelessWidget {
             IconDragon(animate: true),
             SizedBox(height: 16),
             Text(
-              "Tetris V1",
+              "Tetris V2",
               style: TextStyle(fontSize: 20),
             ),
           ],

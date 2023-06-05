@@ -16,12 +16,12 @@ class PageLand extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
+                  children: const <Widget>[
                     Spacer(),
                     SystemButtonGroup(),
                     Spacer(),
                     Padding(
-                      padding: const EdgeInsets.only(left: 40, bottom: 40),
+                      padding: EdgeInsets.only(left: 40, bottom: 40),
                       child: DropButton(),
                     )
                   ],
@@ -31,9 +31,9 @@ class PageLand extends StatelessWidget {
               Expanded(
                 child: Column(
                   children: <Widget>[
-                    Spacer(),
+                    const Spacer(),
                     DirectionController(),
-                    SizedBox(height: 30),
+                    const SizedBox(height: 30),
                   ],
                 ),
               ),

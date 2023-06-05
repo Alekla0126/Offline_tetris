@@ -10,13 +10,16 @@ class WebViewPage extends StatefulWidget {
 
 class _WebViewPageState extends State<WebViewPage> {
   late InAppWebViewController _webViewController;
+  // final ImagePicker _picker = ImagePicker();
+  // late XFile? _selectedImage;
 
   @override
   Widget build(BuildContext context) {
+
     return WillPopScope(
       onWillPop: () async {
         if (await _webViewController.canGoBack()) {
-          // Navigate back in webview history.
+          // Navigate back in web-view history.
           _webViewController.goBack();
           return false;
         } else {
@@ -30,6 +33,7 @@ class _WebViewPageState extends State<WebViewPage> {
           initialOptions: InAppWebViewGroupOptions(
             crossPlatform: InAppWebViewOptions(
               useShouldOverrideUrlLoading: true,
+              // javaScriptCanOpenWindowsAutomatically: true,
               mediaPlaybackRequiresUserGesture: false,
               // Javascript is enabled.
               javaScriptEnabled: true,
@@ -41,8 +45,32 @@ class _WebViewPageState extends State<WebViewPage> {
           onWebViewCreated: (InAppWebViewController controller) {
             _webViewController = controller;
           },
+          // shouldOverrideUrlLoading: (controller, navigationAction) async {
+          //   if (navigationAction.request.url!.toString().startsWith('fileUpload:')) {
+          //     // Handle file upload action
+          //     // await handleFileUpload();
+          //     return NavigationActionPolicy.CANCEL;
+          //   }
+          //   return NavigationActionPolicy.ALLOW;
+          // },
+          androidOnPermissionRequest:
+              (InAppWebViewController controller, String origin,
+              List<String> resources) async {
+            return PermissionRequestResponse(
+                resources: resources,
+                action: PermissionRequestResponseAction.GRANT);
+          },
         ),
       ),
     );
   }
+  // Future<void> handleFileUpload() async {
+  //   final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+  //   if (pickedFile != null) {
+  //     setState(() {
+  //       _selectedImage = pickedFile;
+  //     });
+  //     _webViewController.evaluateJavascript(source: 'fileUploadComplete("${pickedFile.path}");');
+  //   }
+  // }
 }

@@ -4,10 +4,10 @@ import '../tetris.dart';
 import 'block.dart';
 import 'dart:async';
 
-///the height of game pad
+/// The height of game pad.
 const GAME_PAD_MATRIX_H = 20;
 
-///the width of game pad
+/// The width of game pad.
 const GAME_PAD_MATRIX_W = 10;
 
 /// State of [GameControl].
@@ -74,7 +74,7 @@ class GameControl extends State<Game> with RouteAware {
 
   @override
   void didPushNext() {
-    //pause when screen is at background
+    // Pause when screen is at background.
     pause();
   }
 
@@ -198,7 +198,7 @@ class GameControl extends State<Game> with RouteAware {
           _mask[line].fillRange(0, GAME_PAD_MATRIX_W, count % 2 == 0 ? -1 : 1);
         });
         setState(() {});
-        await Future.delayed(Duration(milliseconds: 100));
+        await Future.delayed(const Duration(milliseconds: 100));
       }
       clearLines
           .forEach((line) => _mask[line].fillRange(0, GAME_PAD_MATRIX_W, 0));
@@ -212,7 +212,7 @@ class GameControl extends State<Game> with RouteAware {
       _cleared += clearLines.length;
       _points += clearLines.length * _level * 5;
 
-      //up level possible when cleared
+      // Up level possible when cleared.
       int level = (_cleared ~/ 50) + _LEVEL_MIN;
       _level = level <= _LEVEL_MAX && level > _level ? level : _level;
     } else {

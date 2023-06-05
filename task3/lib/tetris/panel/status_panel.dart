@@ -21,7 +21,7 @@ class StatusPanel extends StatelessWidget {
           Number(number: GameState.of(context).points),
           const SizedBox(height: 10),
           Text(S.of(context).cleans,
-              style: TextStyle(fontWeight: FontWeight.bold)),
+              style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
           Number(number: GameState.of(context).cleared),
           const SizedBox(height: 10),
@@ -67,7 +67,7 @@ class _NextBlock extends StatelessWidget {
 class _GameStatus extends StatefulWidget {
   @override
   _GameStatusState createState() {
-    return new _GameStatusState();
+    return _GameStatusState();
   }
 }
 
@@ -104,9 +104,9 @@ class _GameStatusState extends State<_GameStatus> {
     return Row(
       children: <Widget>[
         IconSound(enable: GameState.of(context).muted),
-        const SizedBox(width: 4),
+        const SizedBox(width: 3),
         IconPause(enable: GameState.of(context).states == GameStates.paused),
-        Spacer(),
+        const Spacer(),
         Number(number: _hour, length: 2, padWithZero: true),
         IconColon(enable: _colonEnable),
         Number(number: _minute, length: 2, padWithZero: true),

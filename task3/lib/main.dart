@@ -1,9 +1,11 @@
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:tetris/penaltyShootout/penaltyGame.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
+import 'package:flame/game.dart';
 import 'web_view_container.dart';
 import 'tetris/tetris.dart';
 import 'dart:async';
@@ -65,21 +67,45 @@ class _HomePageState extends State<HomePage> {
         String firebaseUrl = remoteConfig.getString('firebaseUrl');
 
         // Checking if the local URL is different from the Firebase URL
-        if (firebaseUrl != localUrl) {
-          print('URL has been updated');
-          prefs.setString('localUrl', firebaseUrl);
-        }
+        // and updating the value.
+        // if (firebaseUrl != localUrl) {
+        //   print('URL has been updated');
+        //   prefs.setString('localUrl', firebaseUrl);
+        // }
 
         bool emulator = await checkIsEmu();
-        print('Fetched URL: $firebaseUrl');
+        // Should not be printed in production.
+        // print('Fetched URL: $firebaseUrl');
 
         if ((firebaseUrl != '') || (emulator == false)) {
           setState(() {
             _url = firebaseUrl;
           });
         } else {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const TetrisGamePage()),
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text('Choose Game'),
+              content: Text('Which game would you like to play?'),
+              actions: [
+                TextButton(
+                  child: Text('Tetris'),
+                  onPressed: () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => const TetrisGamePage()),
+                    );
+                  },
+                ),
+                TextButton(
+                  child: Text('Penalty shooter'),
+                  onPressed: () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => GameWidget(game: PenaltyGame())),
+                    );
+                  },
+                ),
+              ],
+            ),
           );
         }
       } catch (e) {
@@ -108,6 +134,7 @@ class _HomePageState extends State<HomePage> {
           child: const AlertDialog(
             title: Text('Network Connection Error'),
             content: Text('A network connection is required to continue.'),
+            // The screen should be frozen.
             // actions: <Widget>[
             //   TextButton(
             //     onPressed: () {
@@ -138,7 +165,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     if (_url.isEmpty) {
-      // Show a loading or error widget when URL is empty
+      // Show a loading or error widget when URL is empty.
       return const Center(
         child: CircularProgressIndicator(),
       );

@@ -35,7 +35,7 @@ class TetrisGamePage extends StatelessWidget {
 }
 
 const SCREEN_BORDER_WIDTH = 3.0;
-const BACKGROUND_COLOR = Color(0xffefcc19);
+const BACKGROUND_COLOR = Color(0xff66cc33);
 
 class _HomePage extends StatelessWidget {
   @override

@@ -105,11 +105,11 @@ class Block {
       }
     }
     final nextXy = [
-      this.xy[0] + ORIGIN[type]![rotateIndex][0],
-      this.xy[1] + ORIGIN[type]![rotateIndex][1]
+      xy[0] + ORIGIN[type]![rotateIndex][0],
+      xy[1] + ORIGIN[type]![rotateIndex][1]
     ];
     final nextRotateIndex =
-        rotateIndex + 1 >= ORIGIN[this.type]!.length ? 0 : rotateIndex + 1;
+        rotateIndex + 1 >= ORIGIN[type]!.length ? 0 : rotateIndex + 1;
 
     return Block(type, result, nextXy, nextRotateIndex);
   }
@@ -131,8 +131,8 @@ class Block {
     return true;
   }
 
-  ///return null if do not show at [x][y]
-  ///return 1 if show at [x,y]
+  /// Return null if do not show at [x][y].
+  /// Return 1 if show at [x,y].
   int? get(int x, int y) {
     x -= xy[0];
     y -= xy[1];

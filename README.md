@@ -27,6 +27,6 @@ build() in _HomePageState is called whenever _url is updated. If _url is empty, 
 
 7. When _HomePageState is removed from the tree (for example, when navigating away from the HomePage), dispose() is called. If the navigation to the Tetris game page has not been completed yet, it completes the navigation in the dispose() method.
 
-## Screenshots
+## Flow
 
 ![Flow](images/flow.png)
