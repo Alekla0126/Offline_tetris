@@ -3,7 +3,8 @@ import 'package:flame/components.dart';
 import 'package:flame/input.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
-import 'dart:math';
+import 'goalie.dart';
+import 'ball.dart';
 import 'dart:ui';
 
 void main() {
@@ -17,7 +18,8 @@ void main() {
 }
 
 class GameWrapper extends StatelessWidget {
-  const GameWrapper({super.key});
+  const GameWrapper({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -31,18 +33,26 @@ class GameWrapper extends StatelessWidget {
 }
 
 class PenaltyGame extends FlameGame with TapDetector {
+  Color gameBackgroundColor = Colors.white; // Renamed field to 'gameBackgroundColor'
   late SpriteComponent background;
-  late Player player;
+  late ScoreLabel scoreLabel;
   late Goalie goalie;
-  late List<GrayBall> grayBalls;
-  late List<ColoredBall> coloredBalls;
+  late Ball player;
 
-  Image? bgImage;
-  Image? soccerBall;
   Image? goalieImage;
+  Image? soccerBall;
+  Image? bgImage;
 
-  int grayBallsCount = 5;
-  int coloredBallsCount = 0;
+  int score = 0;
+
+  @override
+  void render(Canvas canvas) {
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.x, size.y),
+      Paint()..color = gameBackgroundColor, // Set the background color
+    );
+    super.render(canvas);
+  }
 
   @override
   Future<void> onLoad() async {
@@ -55,9 +65,9 @@ class PenaltyGame extends FlameGame with TapDetector {
     );
     add(background);
 
-    player = Player(
+    player = Ball(
       position: Vector2(size.x / 2, size.y - 200),
-      shootCallback: incrementColoredBalls,
+      shootCallback: incrementScore,
       sprite: Sprite(soccerBall!),
       game: this, // Pass the game instance
     );
@@ -66,32 +76,16 @@ class PenaltyGame extends FlameGame with TapDetector {
     goalie = Goalie(
       position: Vector2(size.x / 2, 100),
       sprite: Sprite(goalieImage!),
+      game: this, // Pass the game instance
     );
     add(goalie);
 
-    grayBalls = List.generate(
-      grayBallsCount,
-          (index) => GrayBall(
-            position: Vector2(
-              size.x - size.x / 3 + index * (size.x / 9), // Adjust position
-              size.y - 100.0,
-            ),
-        radius: 20.0,
-      ),
+    // Create and add the score label component
+    scoreLabel = ScoreLabel(
+      position: NotifyingVector2(size.x - 100, 50), // Create a NotifyingVector2 object
+      textStyle: const TextStyle(color: Colors.black, fontSize: 20),
     );
-    grayBalls.forEach(add);
-
-    coloredBalls = List.generate(
-      coloredBallsCount,
-          (index) => ColoredBall(
-        position: Vector2(
-          size.x - size.x / 3 + index * (size.x / 9), // Adjust position
-          size.y - 100.0,
-        ),
-        radius: 20.0,
-      ),
-    );
-    coloredBalls.forEach(add);
+    add(scoreLabel);
   }
 
   Future<void> loadImages() async {
@@ -100,23 +94,23 @@ class PenaltyGame extends FlameGame with TapDetector {
     goalieImage = await Flame.images.load('goalie.png');
   }
 
-  void incrementColoredBalls() {
-    coloredBallsCount++;
-    grayBallsCount--;
-    coloredBalls.add(ColoredBall(
-      position: Vector2(
-          size.x - 100.0 * coloredBallsCount, 50.0
-      ),
-      radius: 20.0,
-    ));
-    grayBalls.removeLast();
-    add(coloredBalls.last);
-    remove(grayBalls.last);
+  void incrementScore() {
+    if (player.collidesWithGoalie(goalie)) {
+      gameBackgroundColor = Colors.red; // Set background color to red on failure
+      player.reset();
+    } else {
+      score++;
+      scoreLabel.score = score;
+    }
   }
 
   @override
   void onTapDown(TapDownInfo info) {
     super.onTapDown(info);
+
+    const double arrowLength = 50.0; // Length of the arrow
+    const double arrowWidth = 20.0; // Width of the arrow
+
     // Check if the player has already chosen the direction
     if (!player.isChoosingDirection) {
       // Player is choosing the direction
@@ -124,106 +118,51 @@ class PenaltyGame extends FlameGame with TapDetector {
     } else {
       // Player is shooting the penalty with strength
       player.shootPenalty(info.eventPosition.game);
-    }
-  }
-}
 
-class Player extends SpriteComponent {
-  late Vector2 shootDirection;
-  double shootStrength = 0;
-  bool isChoosingDirection = false;
-  bool isShooting = false;
-  late void Function() shootCallback;
-  late final PenaltyGame game; // Add the game reference
-
-  Player({
-    required Vector2 position,
-    required this.shootCallback,
-    required Sprite sprite,
-    required this.game, // Pass the game reference
-  }) : super(
-    position: position,
-    size: Vector2.all(100),
-    sprite: sprite,
-  );
-
-  void startChoosingDirection(Vector2 initialPosition) {
-    isChoosingDirection = true;
-    shootDirection = initialPosition - position;
-    shootDirection.normalize();
-  }
-
-  void shootPenalty(Vector2 finalPosition) {
-    if (!isShooting) {
-      isShooting = true;
-      shootDirection = finalPosition - position;
-      shootStrength = shootDirection.length / 500;
-      shootDirection.normalize();
-      shootCallback();
+      // Get the arrow position and direction
+      final arrowPosition = player.position - Vector2(arrowLength / 2, arrowLength + 10);
+      final arrowDirection = player.shootDirection.normalized();
     }
   }
 
   @override
   void update(double dt) {
     super.update(dt);
-    if (isChoosingDirection) {
-      angle = atan2(shootDirection.y, shootDirection.x);
+
+    if (gameBackgroundColor == Colors.red) {
+      // Reset the background color after a certain duration
+      Future.delayed(const Duration(milliseconds: 500), () {
+        gameBackgroundColor = Colors.white;
+      });
     }
-    if (isShooting) {
-      position += shootDirection * shootStrength * dt * 500;
-      // Reset the player's state when the shot is complete
-      if (position.y <= 0) {
-        isChoosingDirection = false;
-        isShooting = false;
-        position = Vector2(game.size.x / 2, game.size.y - 200);
-      }
+    if (player.collidesWithGoalie(goalie)) {
+      goalie.stopBall();
+      gameBackgroundColor = Colors.red;
+      player.reset();
     }
   }
 }
 
-class Goalie extends SpriteComponent {
-  Goalie({
-    required Vector2 position,
-    required Sprite sprite,
-  }) : super(
-    position: position,
-    size: Vector2(100, 100),
-    sprite: sprite,
-  );
-}
+class ScoreLabel extends PositionComponent {
+  @override
+  final NotifyingVector2 position; // Updated type to NotifyingVector2
+  final TextStyle textStyle;
+  int score = 0;
 
-class GrayBall extends PositionComponent {
-  final double radius;
-  Paint paint = Paint()..color = Colors.grey;
-
-  GrayBall({
-    required Vector2 position,
-    required this.radius,
-  }) {
-    this.position = position;
-    size = Vector2(radius * 2, radius * 2);
-  }
+  ScoreLabel({
+    required this.position,
+    required this.textStyle,
+  });
 
   @override
   void render(Canvas canvas) {
-    canvas.drawCircle(position.toOffset(), radius, paint);
-  }
-}
-
-class ColoredBall extends PositionComponent {
-  final double radius;
-  Paint paint = Paint()..color = Colors.green;
-
-  ColoredBall({
-    required Vector2 position,
-    required this.radius,
-  }) {
-    this.position = position;
-    size = Vector2(radius * 2, radius * 2);
-  }
-
-  @override
-  void render(Canvas canvas) {
-    canvas.drawCircle(position.toOffset(), radius, paint);
+    final textSpan = TextSpan(text: 'Score: $score', style: textStyle);
+    final textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    final textPosition = Offset(position.x - textPainter.width, position.y);
+    textPainter.paint(canvas, textPosition);
   }
 }

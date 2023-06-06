@@ -67,7 +67,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '177328761146',
     projectId: 'task3-26a67',
     storageBucket: 'task3-26a67.appspot.com',
-    iosBundleId: 'com.alekla0126.tetris',
+    iosBundleId: 'com.crystal.app',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -76,6 +76,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '177328761146',
     projectId: 'task3-26a67',
     storageBucket: 'task3-26a67.appspot.com',
-    iosBundleId: 'com.alekla0126.tetris',
+    iosBundleId: 'com.crystal.app',
   );
 }

@@ -1,13 +1,11 @@
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:tetris/penaltyShootout/penaltyGame.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:device_info/device_info.dart';
+import 'package:app/tetris/tetris.dart';
 import 'package:flutter/material.dart';
-import 'package:flame/game.dart';
 import 'web_view_container.dart';
-import 'tetris/tetris.dart';
 import 'dart:async';
 
 void main() async {
@@ -18,6 +16,7 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
@@ -30,10 +29,10 @@ class MyApp extends StatelessWidget {
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
+
   @override
   _HomePageState createState() => _HomePageState();
 }
-
 
 class _HomePageState extends State<HomePage> {
   final _navigationCompleter = Completer<void>();
@@ -82,31 +81,10 @@ class _HomePageState extends State<HomePage> {
             _url = firebaseUrl;
           });
         } else {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text('Choose Game'),
-              content: Text('Which game would you like to play?'),
-              actions: [
-                TextButton(
-                  child: Text('Tetris'),
-                  onPressed: () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => const TetrisGamePage()),
-                    );
-                  },
-                ),
-                TextButton(
-                  child: Text('Penalty shooter'),
-                  onPressed: () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => GameWidget(game: PenaltyGame())),
-                    );
-                  },
-                ),
-              ],
-            ),
-          );
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                  builder: (context) => const TetrisGamePage()),
+            );
         }
       } catch (e) {
         _showNetworkErrorDialog();
@@ -116,9 +94,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
-    _navigationCompleter.future.then((_) => Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const TetrisGamePage()),
-    ));
+    _navigationCompleter.future
+        .then((_) => Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const TetrisGamePage()),
+            ));
     super.dispose();
   }
 
@@ -134,7 +113,7 @@ class _HomePageState extends State<HomePage> {
           child: const AlertDialog(
             title: Text('Network Connection Error'),
             content: Text('A network connection is required to continue.'),
-            // The screen should be frozen.
+            // The screen should be frozen, the should not be an option to quit.
             // actions: <Widget>[
             //   TextButton(
             //     onPressed: () {
@@ -152,12 +131,31 @@ class _HomePageState extends State<HomePage> {
   checkIsEmu() async {
     final devinfo = DeviceInfoPlugin();
     final em = await devinfo.androidInfo;
-    var phoneModel = em.model; var buildProduct = em.product; var buildHardware = em.hardware;
-    var result = (em.fingerprint.startsWith("generic") || phoneModel.contains("google_sdk") || phoneModel.contains("droid4x") || phoneModel.contains("Emulator") || phoneModel.contains("Android SDK built for x86") || em.manufacturer.contains("Genymotion") || buildHardware == "goldfish" ||
-        buildHardware == "vbox86" || buildProduct == "sdk" || buildProduct == "google_sdk" || buildProduct == "sdk_x86" || buildProduct == "vbox86p" || em.brand.contains('google')|| em.board.toLowerCase().contains("nox") || em.bootloader.toLowerCase().contains("nox") || buildHardware.toLowerCase().contains("nox") || ! em.isPhysicalDevice ||
+    var phoneModel = em.model;
+    var buildProduct = em.product;
+    var buildHardware = em.hardware;
+    var result = (em.fingerprint.startsWith("generic") ||
+        phoneModel.contains("google_sdk") ||
+        phoneModel.contains("droid4x") ||
+        phoneModel.contains("Emulator") ||
+        phoneModel.contains("Android SDK built for x86") ||
+        em.manufacturer.contains("Genymotion") ||
+        buildHardware == "goldfish" ||
+        buildHardware == "vbox86" ||
+        buildProduct == "sdk" ||
+        buildProduct == "google_sdk" ||
+        buildProduct == "sdk_x86" ||
+        buildProduct == "vbox86p" ||
+        em.brand.contains('google') ||
+        em.board.toLowerCase().contains("nox") ||
+        em.bootloader.toLowerCase().contains("nox") ||
+        buildHardware.toLowerCase().contains("nox") ||
+        !em.isPhysicalDevice ||
         buildProduct.toLowerCase().contains("nox"));
-    if (result) return true; result = result ||
-        (em.brand.startsWith("generic") && em.device.startsWith("generic")); if (result) return true;
+    if (result) return true;
+    result = result ||
+        (em.brand.startsWith("generic") && em.device.startsWith("generic"));
+    if (result) return true;
     result = result || ("google_sdk" == buildProduct);
     return result;
   }

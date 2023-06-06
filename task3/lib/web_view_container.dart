@@ -65,6 +65,7 @@ class _WebViewPageState extends State<WebViewPage> {
       ),
     );
   }
+  // In case it is needed, it is possible to pick an image.
   Future<void> handleFileUpload() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
