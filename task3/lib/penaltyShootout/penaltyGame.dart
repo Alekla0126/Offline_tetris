@@ -96,16 +96,13 @@ class PenaltyGame extends FlameGame with TapDetector {
 
   void incrementScore() {
     if (player.collidesWithGoalie(goalie)) {
-      if (gameBackgroundColor != Colors.red) {
-        gameBackgroundColor = Colors.red; // Set background color to red on failure
         goalie.stopBall(); // Stop the ball if it collides with the goalie
         player.reset();
         Future.delayed(const Duration(milliseconds: 500), () {
-          gameBackgroundColor = Colors.white;
           score++;
           scoreLabel.score = score;
+          gameBackgroundColor = Colors.red; // Set background color to red on success
         });
-      }
     } else {
       score++;
       scoreLabel.score = score;
@@ -116,9 +113,6 @@ class PenaltyGame extends FlameGame with TapDetector {
   void onTapDown(TapDownInfo info) {
     super.onTapDown(info);
 
-    const double arrowLength = 50.0; // Length of the arrow
-    const double arrowWidth = 20.0; // Width of the arrow
-
     // Check if the player has already chosen the direction
     if (!player.isChoosingDirection) {
       // Player is choosing the direction
@@ -128,9 +122,6 @@ class PenaltyGame extends FlameGame with TapDetector {
       player.shootPenalty(info.eventPosition.game);
 
       // Get the arrow position and direction
-      final arrowPosition = player.position - Vector2(arrowLength / 2, arrowLength + 10);
-      final arrowDirection = player.shootDirection.normalized();
-
       // TODO: Implement the logic to handle the arrow position and direction
     }
   }
@@ -139,16 +130,16 @@ class PenaltyGame extends FlameGame with TapDetector {
   @override
   void update(double dt) {
     super.update(dt);
-
     // Check for ball collision with the goalie and handle it
     if (player.collidesWithGoalie(goalie)) {
       goalie.stopBall();
       if (!isColliding) {
         isColliding = true;
-        gameBackgroundColor = Colors.red;
         Future.delayed(const Duration(milliseconds: 500), () {
           isColliding = false;
-          gameBackgroundColor = Colors.white;
+          if (score > 0) {
+            gameBackgroundColor = Colors.white;
+          }
         });
       }
       player.reset();
@@ -177,10 +168,5 @@ class ScoreLabel extends PositionComponent {
     textPainter.layout();
     final textPosition = Offset(position.x - textPainter.width, position.y);
     textPainter.paint(canvas, textPosition);
-  }
-
-  @override
-  void update(double dt) {
-    super.update(dt);
   }
 }

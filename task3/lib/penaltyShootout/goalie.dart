@@ -1,8 +1,9 @@
+import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'penaltyGame.dart';
 import 'ball.dart';
 
-class Goalie extends SpriteComponent {
+class Goalie extends SpriteComponent with HasCollisionDetection{
   final double moveSpeed;
   final PenaltyGame game;
   bool isBallStopped = false;
@@ -12,12 +13,15 @@ class Goalie extends SpriteComponent {
     required Vector2 position,
     required Sprite sprite,
     required this.game,
-    this.moveSpeed = 200.0,
+    this.moveSpeed = 100.0, // Adjust the moveSpeed to control the goalie's movement
   }) : super(
     position: position,
     size: Vector2(100, 100),
     sprite: sprite,
-  );
+  ) {
+    // Add the hitbox to your component
+    add(RectangleHitbox(size: Vector2(50, 50)));
+  }
 
   @override
   void update(double dt) {
@@ -31,7 +35,8 @@ class Goalie extends SpriteComponent {
     direction.normalize();
 
     // Calculate the goalie's new position based on the direction and movement speed
-    final newPosition = Vector2(ballPosition.x, goaliePosition.y);
+    final movement = direction * (moveSpeed * dt);
+    final newPosition = goaliePosition + movement;
 
     // Ensure the goalie stays within the game bounds
     final gameSize = game.size;
