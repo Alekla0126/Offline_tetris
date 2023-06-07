@@ -1,7 +1,6 @@
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:app/penaltyShootout/penaltyGame.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:device_info/device_info.dart';
 import 'package:app/tetris/tetris.dart';
@@ -74,9 +73,10 @@ class _HomePageState extends State<HomePage> {
             _url = firebaseUrl;
           });
         } else {
+            print('Fetched URL: $firebaseUrl');
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
-                  builder: (context) => const GameWrapper()),
+                  builder: (context) => const TetrisGamePage()),
             );
         }
       } catch (e) {
@@ -157,6 +157,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     if (_url.isEmpty) {
       // Show a loading or error widget when URL is empty.
+      // While the app is charging, then renders the website or game.
       return const Center(
         child: CircularProgressIndicator(),
       );
