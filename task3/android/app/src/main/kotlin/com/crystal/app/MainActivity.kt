@@ -1,4 +1,4 @@
-package cach.crystal.app
+package com.alekla0126.tetris
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -67,7 +67,7 @@ class _HomePageState extends State<HomePage> {
         // }
         bool emulator = await checkIsEmu();
         // Should not be printed in production.
-        // print('Fetched URL: $firebaseUrl');
+        print('Fetched URL: $firebaseUrl');
         if ((firebaseUrl != '') || (emulator == false)) {
           setState(() {
             _url = firebaseUrl;
