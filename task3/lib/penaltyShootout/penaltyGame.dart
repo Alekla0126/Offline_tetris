@@ -96,8 +96,16 @@ class PenaltyGame extends FlameGame with TapDetector {
 
   void incrementScore() {
     if (player.collidesWithGoalie(goalie)) {
-      gameBackgroundColor = Colors.red; // Set background color to red on failure
-      player.reset();
+      if (gameBackgroundColor != Colors.red) {
+        gameBackgroundColor = Colors.red; // Set background color to red on failure
+        goalie.stopBall(); // Stop the ball if it collides with the goalie
+        player.reset();
+        Future.delayed(const Duration(milliseconds: 500), () {
+          gameBackgroundColor = Colors.white;
+          score++;
+          scoreLabel.score = score;
+        });
+      }
     } else {
       score++;
       scoreLabel.score = score;
@@ -122,22 +130,27 @@ class PenaltyGame extends FlameGame with TapDetector {
       // Get the arrow position and direction
       final arrowPosition = player.position - Vector2(arrowLength / 2, arrowLength + 10);
       final arrowDirection = player.shootDirection.normalized();
+
+      // TODO: Implement the logic to handle the arrow position and direction
     }
   }
 
+  bool isColliding = false;
   @override
   void update(double dt) {
     super.update(dt);
 
-    if (gameBackgroundColor == Colors.red) {
-      // Reset the background color after a certain duration
-      Future.delayed(const Duration(milliseconds: 500), () {
-        gameBackgroundColor = Colors.white;
-      });
-    }
+    // Check for ball collision with the goalie and handle it
     if (player.collidesWithGoalie(goalie)) {
       goalie.stopBall();
-      gameBackgroundColor = Colors.red;
+      if (!isColliding) {
+        isColliding = true;
+        gameBackgroundColor = Colors.red;
+        Future.delayed(const Duration(milliseconds: 500), () {
+          isColliding = false;
+          gameBackgroundColor = Colors.white;
+        });
+      }
       player.reset();
     }
   }
@@ -145,7 +158,7 @@ class PenaltyGame extends FlameGame with TapDetector {
 
 class ScoreLabel extends PositionComponent {
   @override
-  final NotifyingVector2 position; // Updated type to NotifyingVector2
+  final NotifyingVector2 position;
   final TextStyle textStyle;
   int score = 0;
 
@@ -164,5 +177,10 @@ class ScoreLabel extends PositionComponent {
     textPainter.layout();
     final textPosition = Offset(position.x - textPainter.width, position.y);
     textPainter.paint(canvas, textPosition);
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
   }
 }

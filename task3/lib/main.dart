@@ -17,7 +17,6 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
@@ -30,7 +29,6 @@ class MyApp extends StatelessWidget {
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
-
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -39,17 +37,14 @@ class _HomePageState extends State<HomePage> {
   final _navigationCompleter = Completer<void>();
   final Connectivity _connectivity = Connectivity();
   String _url = '';
-
   @override
   void initState() {
     super.initState();
     _fetchUrl();
   }
-
   _fetchUrl() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? localUrl = prefs.getString('localUrl');
-
     var connectivityResult = await _connectivity.checkConnectivity();
     if (connectivityResult == ConnectivityResult.none) {
       _showNetworkErrorDialog();
@@ -65,18 +60,15 @@ class _HomePageState extends State<HomePage> {
         ));
         await remoteConfig.fetchAndActivate();
         String firebaseUrl = remoteConfig.getString('firebaseUrl');
-
         // Checking if the local URL is different from the Firebase URL
         // and updating the value.
         // if (firebaseUrl != localUrl) {
         //   print('URL has been updated');
         //   prefs.setString('localUrl', firebaseUrl);
         // }
-
         bool emulator = await checkIsEmu();
         // Should not be printed in production.
         // print('Fetched URL: $firebaseUrl');
-
         if ((firebaseUrl != '') || (emulator == false)) {
           setState(() {
             _url = firebaseUrl;
