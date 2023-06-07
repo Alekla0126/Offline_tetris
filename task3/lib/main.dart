@@ -2,6 +2,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:device_info/device_info.dart';
 import 'package:app/tetris/tetris.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
@@ -28,6 +30,7 @@ class MyApp extends StatelessWidget {
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -36,11 +39,25 @@ class _HomePageState extends State<HomePage> {
   final _navigationCompleter = Completer<void>();
   final Connectivity _connectivity = Connectivity();
   String _url = '';
+
   @override
   void initState() {
     super.initState();
     _fetchUrl();
   }
+
+  bool _isValidUrl(String url) {
+    if (url.trim().isEmpty || url.trim() == ' ') {
+      return false; // Empty or whitespace-only string is not a valid URL
+    }
+    Uri? uri = Uri.tryParse(url);
+    if (uri != null && uri.hasScheme) {
+      return true; // Valid URL
+    }
+    return false; // Invalid URL
+  }
+
+
   _fetchUrl() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? localUrl = prefs.getString('localUrl');
@@ -59,25 +76,25 @@ class _HomePageState extends State<HomePage> {
         ));
         await remoteConfig.fetchAndActivate();
         String firebaseUrl = remoteConfig.getString('firebaseUrl');
+
         // Checking if the local URL is different from the Firebase URL
         // and updating the value.
         // if (firebaseUrl != localUrl) {
         //   print('URL has been updated');
         //   prefs.setString('localUrl', firebaseUrl);
         // }
-        bool emulator = await checkIsEmu();
-        // Should not be printed in production.
+
+        // Check if the fetched URL is a valid URL
         print('Fetched URL: $firebaseUrl');
-        if ((firebaseUrl != '') || (emulator == false)) {
+        bool emulator = await checkIsEmu();
+        if ((emulator == false) || _isValidUrl(firebaseUrl)) {
           setState(() {
             _url = firebaseUrl;
           });
         } else {
-            print('Fetched URL: $firebaseUrl');
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                  builder: (context) => const TetrisGamePage()),
-            );
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const TetrisGamePage()),
+          );
         }
       } catch (e) {
         _showNetworkErrorDialog();
@@ -164,5 +181,27 @@ class _HomePageState extends State<HomePage> {
     } else {
       return WebViewPage(url: _url);
     }
+  }
+
+  _showErrorDialogURL(String errorMessage) {
+    showDialog(
+      context: context,
+      // The user cannot close the dialog.
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('URL Error'),
+          content: Text(errorMessage),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
