@@ -1,6 +1,7 @@
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:app/penaltyShootout/penaltyGame.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:device_info/device_info.dart';
 import 'package:app/tetris/tetris.dart';
@@ -83,7 +84,7 @@ class _HomePageState extends State<HomePage> {
         } else {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
-                  builder: (context) => const TetrisGamePage()),
+                  builder: (context) => const GameWrapper()),
             );
         }
       } catch (e) {
