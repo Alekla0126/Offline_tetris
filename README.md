@@ -3,29 +3,33 @@
 
 ## App flow
 
-1. When the application is launched, the main() function is the first function that's executed. It ensures Firebase is initialized, and then it starts your MyApp.
+1. The main entry point of the application is the main function. It initializes the Flutter app by calling WidgetsFlutterBinding.ensureInitialized() and then initializes Firebase by calling Firebase.initializeApp(). Finally, it runs the MyApp widget.
 
-2. MyApp is a StatelessWidget that returns a MaterialApp as its widget tree. The root of this MaterialApp is the HomePage.
+2. The MyApp widget is a stateless widget and serves as the root of the application. It creates a MaterialApp widget with a HomePage widget as its home.
 
-3. HomePage is a StatefulWidget, which means it can hold mutable state. The corresponding State object is _HomePageState.
+3. The HomePage widget is a stateful widget that creates the UI for the home page of the app. It has an associated state class _HomePageState which extends State<HomePage>.
 
-4. As soon as HomePage is inserted into the tree, initState() in _HomePageState is called. This method is only called once in the lifecycle of a State object.
+4. In the _HomePageState class, there are several properties defined:
 
-5. initState() calls the _fetchUrl() method, which is asynchronous and can be split into a few main parts:
+_navigationCompleter: It is a Completer object that will be used to complete a future navigation operation.
+_connectivity: It is an instance of Connectivity class used to check the device's connectivity status.
+_url: It is a string variable that holds the URL to be loaded in the web view.
 
-- It fetches the URL from SharedPreferences. This is the URL that was saved from the previous app launch. If there is no URL saved, it sets _url to an empty string.
-It checks the device's connectivity. If there's no network connection, it shows a dialog informing the user of the network error and sets _url to the locally saved URL or to an empty string if there is no locally saved URL.
-- If there is a network connection, it tries to fetch the URL from Firebase Remote Config.
-- It sets the config settings for Firebase Remote Config to fetch the values within a 60 seconds timeout and it sets the minimum fetch interval to 0 seconds.
-- It fetches and activates the Firebase Remote Config values.
-- It gets the URL from Firebase Remote Config.
-- It checks if the device is an emulator. If the URL fetched from Firebase is not empty or the device is not an emulator, it checks if the locally saved URL is different from the fetched URL. If it is different, it saves the fetched URL in SharedPreferences and sets _url to the fetched URL. If the URL fetched from Firebase is empty and the device is an emulator, it navigates to the Tetris game page.
-- If there's an error while fetching the URL from 
+5. The initState method is overridden to perform initialization tasks when the HomePage widget is created. It calls the _fetchUrl method to fetch the URL.
 
-6. Firebase Remote Config, it shows a dialog informing the user of the network error.
-build() in _HomePageState is called whenever _url is updated. If _url is empty, it shows a loading spinner. Otherwise, it shows the WebViewPage with the URL.
+6. The _fetchUrl method is responsible for fetching the URL from either Firebase Remote Config or local storage. It first retrieves the locally stored URL from SharedPreferences. Then, it checks the device's connectivity status using Connectivity and handles the case when there is no network connection by showing a network error dialog and setting the _url variable to the locally stored URL.
 
-7. When _HomePageState is removed from the tree (for example, when navigating away from the HomePage), dispose() is called. If the navigation to the Tetris game page has not been completed yet, it completes the navigation in the dispose() method.
+7. If there is an internet connection, the method proceeds to fetch the URL from Firebase Remote Config using FirebaseRemoteConfig. It sets the configuration settings and then fetches and activates the remote config. It retrieves the URL value from the remote config and checks if it is a valid URL. If the URL is valid or the device is an emulator, it sets the _url variable with the fetched URL.
+
+8. If the URL is empty, it displays a loading indicator. Otherwise, it renders the WebViewPage widget passing the _url value.
+
+9. The dispose method is overridden to perform cleanup tasks when the HomePage widget is removed. It waits for the _navigationCompleter future to complete and then navigates to the TetrisGamePage.
+
+10. The _showNetworkErrorDialog method displays a network error dialog when there is no network connection. It shows an alert dialog with a title and content, and the dialog cannot be closed by the user.
+
+11. The checkIsEmu method is responsible for checking if the device is an emulator. It uses the DeviceInfoPlugin to retrieve information about the Android device and checks various properties to determine if it is an emulator.
+
+12. The build method of the _HomePageState class is called whenever the state changes. If the _url is empty, it displays a CircularProgressIndicator in the center of the screen. Otherwise, it renders the WebViewPage passing the _url value.
 
 ## Flow
 
