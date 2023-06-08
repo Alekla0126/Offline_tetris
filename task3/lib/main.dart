@@ -16,6 +16,7 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -36,11 +38,33 @@ class _HomePageState extends State<HomePage> {
   final _navigationCompleter = Completer<void>();
   final Connectivity _connectivity = Connectivity();
   String _url = '';
+
   @override
   void initState() {
     super.initState();
     _fetchUrl();
   }
+
+  bool _isValidUrl(String url) {
+    // In case there is a space after the trim.
+    if (url.trim().isEmpty || url.trim() == ' ') {
+      return false;
+    }
+    // Check if the URL is valid by parsing it.
+    Uri? uri = Uri.tryParse(url);
+    // If the URL is valid and has a scheme (http/https).
+    if (uri != null && uri.hasScheme) {
+      return true; // Valid URL
+    }
+    // If the URL is valid but does not have a scheme (http/https).
+    else if (uri != null && !uri.hasScheme) {
+      return false; // Invalid URL
+    }
+    // If the URL is invalid.
+    return false; // Invalid URL
+  }
+
+
   _fetchUrl() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? localUrl = prefs.getString('localUrl');
@@ -59,22 +83,24 @@ class _HomePageState extends State<HomePage> {
         ));
         await remoteConfig.fetchAndActivate();
         String firebaseUrl = remoteConfig.getString('firebaseUrl');
+
         // Checking if the local URL is different from the Firebase URL
         // and updating the value.
         // if (firebaseUrl != localUrl) {
         //   print('URL has been updated');
         //   prefs.setString('localUrl', firebaseUrl);
         // }
+
+        // Check if the fetched URL is a valid URL
+        print('Fetched URL: $firebaseUrl');
         bool emulator = await checkIsEmu();
-        // Should not be printed in production.
-        if ((firebaseUrl.trim() != '') || (emulator == false)) {
+        if ((emulator == true) || _isValidUrl(firebaseUrl)) {
           setState(() {
             _url = firebaseUrl;
           });
         } else {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-                builder: (context) => const TetrisGamePage()),
+            MaterialPageRoute(builder: (context) => const TetrisGamePage()),
           );
         }
       } catch (e) {
