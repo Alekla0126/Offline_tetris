@@ -1,26 +1,36 @@
 {
   "project_info": {
-    "project_number": "177328761146",
-    "project_id": "task3-26a67",
-    "storage_bucket": "task3-26a67.appspot.com"
+    "project_number": "451020812589",
+    "project_id": "cach-6b792",
+    "storage_bucket": "cach-6b792.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:177328761146:android:8a2a85d0de5ef0428e8803",
+        "mobilesdk_app_id": "1:451020812589:android:048a59d9b31ecf3264a3a4",
         "android_client_info": {
-          "package_name": "com.alekla0126.tetris"
+          "package_name": "cach.crystal.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "451020812589-8lkhf0ogg86pkjmr0r6938hsl4pv1dq0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyC30UsY2C1RNAUYPoouDPenJ374wFUoBxs"
+          "current_key": "AIzaSyAaNn9jFZuNZE_masjAGAGB9z_PPxPt6es"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "451020812589-8lkhf0ogg86pkjmr0r6938hsl4pv1dq0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
