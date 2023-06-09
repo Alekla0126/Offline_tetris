@@ -64,7 +64,6 @@ class _HomePageState extends State<HomePage> {
     return false; // Invalid URL
   }
 
-
   _fetchUrl() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? localUrl = prefs.getString('localUrl');
@@ -92,9 +91,10 @@ class _HomePageState extends State<HomePage> {
         // }
 
         // Check if the fetched URL is a valid URL
-        print('Fetched URL: $firebaseUrl');
         bool emulator = await checkIsEmu();
-        if ((emulator == true) || _isValidUrl(firebaseUrl)) {
+        // Print the URL, do not include in production.
+        // print('Fetched URL: $firebaseUrl');
+        if ((emulator == false) || _isValidUrl(firebaseUrl)) {
           setState(() {
             _url = firebaseUrl;
           });
@@ -113,8 +113,8 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     _navigationCompleter.future
         .then((_) => Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const TetrisGamePage()),
-    ));
+              MaterialPageRoute(builder: (context) => const TetrisGamePage()),
+            ));
     super.dispose();
   }
 
@@ -181,7 +181,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     if (_url.isEmpty) {
       // Show a loading or error widget when URL is empty.
-      // While the app is charging, then renders the website or game.
+      // While the app is charging, then renders the website or stub.
       return const Center(
         child: CircularProgressIndicator(),
       );
