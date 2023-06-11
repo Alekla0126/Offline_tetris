@@ -16,7 +16,6 @@ class _WebViewPageState extends State<WebViewPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return WillPopScope(
       onWillPop: () async {
         if (await _webViewController.canGoBack()) {
@@ -29,38 +28,54 @@ class _WebViewPageState extends State<WebViewPage> {
         }
       },
       child: Scaffold(
-        body: InAppWebView(
-          initialUrlRequest: URLRequest(url: Uri.parse(widget.url)),
-          initialOptions: InAppWebViewGroupOptions(
-            crossPlatform: InAppWebViewOptions(
-              useShouldOverrideUrlLoading: true,
-              javaScriptCanOpenWindowsAutomatically: true,
-              mediaPlaybackRequiresUserGesture: false,
-              // Javascript is enabled.
-              javaScriptEnabled: true,
-            ),
-            android: AndroidInAppWebViewOptions(
-              useHybridComposition: true,
-            ),
+        body: SafeArea(
+          child: Stack(
+            children: [
+              InAppWebView(
+                initialUrlRequest: URLRequest(url: Uri.parse(widget.url)),
+                initialOptions: InAppWebViewGroupOptions(
+                  crossPlatform: InAppWebViewOptions(
+                    useShouldOverrideUrlLoading: true,
+                    javaScriptCanOpenWindowsAutomatically: true,
+                    mediaPlaybackRequiresUserGesture: false,
+                    // Javascript is enabled.
+                    javaScriptEnabled: true,
+                  ),
+                  android: AndroidInAppWebViewOptions(
+                    useHybridComposition: true,
+                  ),
+                ),
+                onWebViewCreated: (InAppWebViewController controller) {
+                  _webViewController = controller;
+                },
+                shouldOverrideUrlLoading: (controller, navigationAction) async {
+                  if (navigationAction.request.url!.toString().startsWith('fileUpload:')) {
+                    // Handle file upload action
+                    // await handleFileUpload();
+                    return NavigationActionPolicy.CANCEL;
+                  }
+                  return NavigationActionPolicy.ALLOW;
+                },
+                androidOnPermissionRequest:
+                    (InAppWebViewController controller, String origin,
+                    List<String> resources) async {
+                  return PermissionRequestResponse(
+                      resources: resources,
+                      action: PermissionRequestResponseAction.GRANT);
+                },
+              ),
+              Align(
+                alignment: Alignment.topRight,
+                child: Container(
+                  padding: const EdgeInsets.only(top: 55, right: 50),
+                  child: const Banner(
+                    message: "Alekla0126",
+                    location: BannerLocation.bottomStart,
+                  ),
+                ),
+              ),
+            ],
           ),
-          onWebViewCreated: (InAppWebViewController controller) {
-            _webViewController = controller;
-          },
-          shouldOverrideUrlLoading: (controller, navigationAction) async {
-            if (navigationAction.request.url!.toString().startsWith('fileUpload:')) {
-              // Handle file upload action
-              // await handleFileUpload();
-              return NavigationActionPolicy.CANCEL;
-            }
-            return NavigationActionPolicy.ALLOW;
-          },
-          androidOnPermissionRequest:
-              (InAppWebViewController controller, String origin,
-              List<String> resources) async {
-            return PermissionRequestResponse(
-                resources: resources,
-                action: PermissionRequestResponseAction.GRANT);
-          },
         ),
       ),
     );

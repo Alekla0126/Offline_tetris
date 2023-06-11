@@ -46,23 +46,26 @@ class _HomePageState extends State<HomePage> {
   }
 
   bool _isValidUrl(String url) {
-    // In case there is a space after the trim.
-    if (url.trim().isEmpty || url.trim() == ' ') {
+    // Remove spaces from the URL
+    url = url.replaceAll(' ', '');
+    // Check if the URL is empty after removing spaces
+    if (url.isEmpty) {
       return false;
     }
-    // Check if the URL is valid by parsing it.
+    // Check if the URL is valid by parsing it
     Uri? uri = Uri.tryParse(url);
-    // If the URL is valid and has a scheme (http/https).
+    // If the URL is valid and has a scheme (http/https)
     if (uri != null && uri.hasScheme) {
       return true; // Valid URL
     }
-    // If the URL is valid but does not have a scheme (http/https).
+    // If the URL is valid but does not have a scheme (http/https)
     else if (uri != null && !uri.hasScheme) {
       return false; // Invalid URL
     }
-    // If the URL is invalid.
+    // If the URL is invalid
     return false; // Invalid URL
   }
+
 
   _fetchUrl() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
